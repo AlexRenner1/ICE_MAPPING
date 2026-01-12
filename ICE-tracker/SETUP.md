@@ -182,7 +182,7 @@ Example: `rf_abc123XYZ789...`
 
 This project uses a **public model** that's already trained:
 
-- **Model ID:** `frenchpoliceunits-o2kkt`
+- **Model ID:** `fmy-first-project-ulnpd`
 - **Version:** `1`
 
 You don't need to do anything else - the model is public and works with any Roboflow API key!
@@ -305,7 +305,7 @@ VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 # Get your API key from Step 4.2
 
 VITE_ROBOFLOW_API_KEY=rf_abc123XYZ789
-VITE_ROBOFLOW_MODEL_ID=frenchpoliceunits-o2kkt
+VITE_ROBOFLOW_MODEL_ID=fmy-first-project-ulnpd
 VITE_ROBOFLOW_MODEL_VERSION=1
 
 # -----------------------------
