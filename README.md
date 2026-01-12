@@ -113,7 +113,7 @@ VITE_FIREBASE_MEASUREMENT_ID=G-XXXXX
 
 # Roboflow (from Roboflow Settings)
 VITE_ROBOFLOW_API_KEY=rf_xxxxx
-VITE_ROBOFLOW_MODEL_ID=frenchpoliceunits-o2kkt
+VITE_ROBOFLOW_MODEL_ID=fmy-first-project-ulnpd
 VITE_ROBOFLOW_MODEL_VERSION=1
 
 # Google Maps (from Google Cloud Console)
@@ -126,7 +126,7 @@ VITE_GOOGLE_MAPS_API_KEY=AIzaSy...
 
 This project includes a **public detection model** hosted on Roboflow:
 
-- **Model:** `frenchpoliceunits-o2kkt`
+- **Model:** `fmy-first-project-ulnpd`
 - **Version:** `1`
 
 You can use this model with any Roboflow API key, or train your own custom model on [Roboflow](https://roboflow.com) and update the environment variables.
