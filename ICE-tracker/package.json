@@ -1,0 +1,30 @@
+{
+  "name": "protest-tracker",
+  "version": "1.0.0",
+  "description": "A cross-platform web application for tracking and mapping protest-related activities using AI-powered image detection and real-time geolocation data.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "keywords": [
+    "protest",
+    "tracker",
+    "ai",
+    "roboflow",
+    "firebase",
+    "maps",
+    "computer-vision"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "firebase": "^11.0.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

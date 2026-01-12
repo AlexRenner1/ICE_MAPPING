@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to upload images
+    match /images/{userId}/{fileName} {
+      allow read, write: if request.auth != null 
+        && request.auth.uid == userId
+        && fileName.matches('.*\\.(jpg|jpeg|png|gif)$')
+        && resource.size < 10 * 1024 * 1024; // Max 10MB
+    }
+    
+    // Public read access for processed images (if needed)
+    match /public/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // No direct writes to public folder
+    }
+  }
+}

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protest Tracker</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
+        
+        #map {
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        #camera-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: none;
+            z-index: 2000;
+        }
+        
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #image-preview-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: none;
+            z-index: 2100;
+        }
+        
+        #preview-canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: black;
+        }
+        
+        #predictions-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .prediction-box {
+            position: absolute;
+            border: 3px solid;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        
+        .prediction-label {
+            position: absolute;
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 0 0 4px 4px;
+            top: -3px;
+            left: -3px;
+            white-space: nowrap;
+        }
+        
+        .preview-buttons {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+        
+        .preview-button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        #continue-button {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        #continue-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+        }
+        
+        #camera-button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        #camera-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+        
+        #capture-button {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        #capture-button:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+        
+        #close-camera {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            padding: 10px 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        #close-preview {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            padding: 10px 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        #detection-status {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            padding: 15px 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+            max-width: 300px;
+            font-size: 14px;
+        }
+        
+        #preview-status {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            padding: 15px 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+            max-width: 300px;
+            font-size: 14px;
+        }
+        
+        #open-camera {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        #location-status {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 15px 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 25px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        
+        .status-good { color: #2ecc71; }
+        .status-error { color: #e74c3c; }
+        .status-loading { color: #f39c12; }
+        
+        .connection-status {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            padding: 10px 15px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            z-index: 100;
+            font-size: 12px;
+        }
+        
+        .error-message {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 200;
+            max-width: 80%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .analyzing-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 2200;
+        }
+
+        #color-legend {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-spinner" id="loading-spinner">Loading application...</div>
+    
+    <div id="map" style="display: none;"></div>
+    
+    <button id="open-camera" style="display: none;">Open Camera</button>
+    <div id="location-status" class="status-loading" style="display: none;">Location: Loading...</div>
+    
+    <div id="connection-status" class="connection-status" style="display: none;">
+        <div id="firebase-status">Firebase: Connecting...</div>
+        <div id="roboflow-status">Roboflow: Ready</div>
+    </div>
+    
+    <div id="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <button id="capture-button">Capture & Analyze</button>
+        <button id="close-camera">Close</button>
+        <div id="detection-status"></div>
+    </div>
+    
+    <div id="image-preview-container">
+        <canvas id="preview-canvas"></canvas>
+        <div id="predictions-overlay"></div>
+        <button id="close-preview">Close</button>
+        <div id="preview-status"></div>
+        <div class="preview-buttons">
+            <button id="continue-button" class="preview-button">Map</button>
+            <button id="camera-button" class="preview-button">Camera</button>
+        </div>
+        <div id="analyzing-indicator" class="analyzing-spinner" style="display: none;">
+            Analyzing image...
+        </div>
+    </div>
+    
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
